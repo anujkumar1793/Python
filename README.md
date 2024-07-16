@@ -1,2 +1,2 @@
-# python-mini-projects
-Python projects for beginners
+# python project
+Python project for beginners
