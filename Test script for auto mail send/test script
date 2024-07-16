@@ -1,1 +1,53 @@
+import pandas as pd
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
+
+# Email configuration
+SMTP_SERVER = 'smtp.example.com'
+SMTP_PORT = 587
+EMAIL_ADDRESS = 'your_email@example.com'
+EMAIL_PASSWORD = 'your_password'
+
+# Read Excel file
+df = pd.read_excel('path_to_your_excel_file.xlsx')
+
+# Function to send email
+def send_email(to_address, subject, body, attachment_path, cc_addresses=[]):
+    msg = MIMEMultipart()
+    msg['From'] = EMAIL_ADDRESS
+    msg['To'] = to_address
+    msg['Cc'] = ', '.join(cc_addresses)
+    msg['Subject'] = subject
+
+    msg.attach(MIMEText(body, 'plain'))
+
+    # Attachment
+    if attachment_path:
+        attachment = open(attachment_path, 'rb')
+        part = MIMEBase('application', 'octet-stream')
+        part.set_payload(attachment.read())
+        encoders.encode_base64(part)
+        part.add_header('Content-Disposition', f"attachment; filename= {attachment_path.split('/')[-1]}")
+        msg.attach(part)
+
+    # SMTP server connection
+    with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+        server.starttls()
+        server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+        server.sendmail(EMAIL_ADDRESS, [to_address] + cc_addresses, msg.as_string())
+
+# Loop through Excel rows and send emails
+for index, row in df.iterrows():
+    name = row['Name']
+    id = row['ID']
+    to_email = row['Email']
+    subject = f"Your Subject Line with {name} and {id}"
+    body = f"Dear {name},\n\nThis is the email content.\n\nBest Regards,\nYour Name"
+    attachment_path = 'path_to_your_attachment.pdf'
+    cc_emails = ['cc1@example.com', 'cc2@example.com']  # Add CC addresses as needed
+
+    send_email(to_email, subject, body, attachment_path, cc_emails)
 
