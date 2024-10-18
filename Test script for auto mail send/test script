@@ -51,3 +51,4 @@ for index, row in df.iterrows():
 
     send_email(to_email, subject, body, attachment_path, cc_emails)
 
+
